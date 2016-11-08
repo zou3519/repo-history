@@ -8,6 +8,7 @@ from scoremodel import *
 from patch import *
 from examinegraph import *
 from heatmap import *
+from caching import *
 
 
 def applyCodeModel(name, source, repo_path):
@@ -19,7 +20,15 @@ def applyCodeModel(name, source, repo_path):
     patch_maker = OldPatchMaker()
     score_model = SimpleScoreModel()
 
-    (patch_model, content) = buildPatchModel(code_iterable, distance_model, patch_maker)
+    (patch_model, content) = read_cached_model(name + ".txt")
+    if patch_model is None or content is None:
+        print ("Building patch model . . .")
+        (patch_model, content) = buildPatchModel(
+            code_iterable, distance_model, patch_maker)
+        save_to_cache(name + ".txt", patch_model, content)
+
+    # I feel like scoring could take a while... cache score sometime?
+    print ('Scoring patch model . . .')
     score_dict = score_model.score(patch_model.graph)
 
     return (patch_model, content, score_dict)
@@ -55,9 +64,12 @@ def parse_args():
 
 def main():
     args = parse_args()
+
     (patch_model, content, score_dict) = applyCodeModel(
         args.name, args.source[0], args.repo_path)
+    print ("Building patch model viz . . .")
     build_viz_from_graph(args.name, patch_model.graph, score_dict)
+    print ("Building heatmap . . .")
     build_heatmap(args.name, patch_model.model, content, score_dict)
 
 
