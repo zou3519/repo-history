@@ -1,0 +1,159 @@
+<!DOCTYPE>
+<html>
+	<head>
+		<title>[cytoscape.js-qtip.js] Cytoscape.js qTip</title>
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+		<link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.css">
+		<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.js"></script>
+		<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+		<script src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
+		<script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.1.2/cytoscape-dagre.js"></script>
+
+		<!-- <script src="../cytoscape.js/build/cytoscape.js"></script> -->
+		<script src="cytoscape-qtip.js"></script>
+		<style>
+			body {
+				font-family: helvetica;
+				font-size: 14px;
+				width: 100%;
+				height: 100%;
+			}
+			#cy {
+				width: 100%;
+				height: 100%;
+				position: absolute;
+				left: 0;
+				top: 0;
+				z-index: 999;
+			}
+			h1 {
+				opacity: 0.5;
+				font-size: 1em;
+			}
+		</style>
+		<script>
+			$(function(){
+
+				var cy = window.cy = cytoscape({
+					container: document.getElementById('cy'),
+
+					ready: function(){
+					},
+
+					style: [
+						{
+							selector: 'node',
+							style: {
+								// 'width': 'data(score)',
+								// 'height': 'data(score)',
+								'label': 'data(id)'
+							}
+						},
+
+						{
+							selector: 'edge',
+							style: {
+								'width': 4,
+								'line-color': '#ccc',
+						        'target-arrow-color': '#ccc',
+						        'target-arrow-shape': 'triangle',
+						        'curve-style': 'bezier',
+						        // 'label': 'data(dist)'
+							}
+						}
+					],
+
+					layout: {
+						name: "dagre"
+					},
+
+					elements: 
+					// python string template
+					$elements
+
+				});
+
+				function par(text) {
+					return '<p>' + text + '</p>'
+				}
+
+				function prettydata(data, field, label) {
+					return par(label + data[field])
+				}
+
+				// just use the regular qtip api but on cy elements
+				cy.nodes().qtip({
+					content: function(){ 
+						data = this._private.data;
+						patch = JSON.parse(data['patch']);
+						html = '';
+						html += '<h1>Metadata</h1>'
+
+						// seconds since epoch 
+						var utcSeconds = data.time;
+						var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+						d.setUTCSeconds(utcSeconds);
+
+						html += prettydata(patch, 'pid', 'pid: ');
+						html += prettydata(data, 'score', 'score: ');
+						html += '<p>' + d + '</p>';
+						html += '<p>' + patch['revision'] + '</p>';
+						html += '<p>' + (patch['ptype'] === 0 ? 'add' : 'delete') + ' (' + patch['start'] + ',' + patch['end'] + ')<\p>';
+						html += '<h1>Content</h1>';
+						html += '<p>';
+						arr = eval(patch['content']);
+						for (i = 0; i < arr.length; i++) {
+							html += arr[i] + "<sup>" + (patch.start + i) + "</sup>"
+						}
+						html += '</p>';
+						// html += '<p>' + patch['content'] + '</p>'
+						return html;
+					},
+					position: {
+						my: 'top center',
+						at: 'bottom center'
+					},
+					style: {
+						classes: 'qtip-bootstrap',
+						tip: {
+							width: 16,
+							height: 8
+						}
+					}
+				});
+
+				cy.edges().qtip({
+					content: function(){ 
+						data = this._private.data;
+						html = '';
+						html += '<h1>Edge Metadata</h1>'
+						html += prettydata(data, 'dist', 'dist: ')
+						html += prettydata(data, 'prob', 'pr: ')
+						return html;
+					},
+					position: {
+						my: 'top center',
+						at: 'bottom center'
+					},
+					style: {
+						classes: 'qtip-bootstrap',
+						tip: {
+							width: 16,
+							height: 8
+						}
+					}
+				});
+
+			});
+		</script>
+	</head>
+
+	<body>
+		<h1>[pomelo] Patch Model Visualization</h1>
+
+		<div id="cy"></div>
+
+	</body>
+
+</html>
