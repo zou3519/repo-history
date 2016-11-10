@@ -95,7 +95,9 @@ def colorHUSL(title, remove, metricName, model, content, colors, metricDict):
     colorFile.write("<body>\n")
 
     content = content.split("\n")
-    content = [(line.split(), whitespace2html(beginning_whitespace(line))) for line in content]
+    # content = [(line.split(), whitespace2html(beginning_whitespace(line))) for line in content]
+    content = [([line], whitespace2html(beginning_whitespace(line))) for line in content]
+    print(content)
     # content = [re.split(r'(\s+)', line) for line in content]
     # print content
 
@@ -117,6 +119,9 @@ def colorHUSL(title, remove, metricName, model, content, colors, metricDict):
                     color = colors[model[pos][1]]
                     dif = model[pos][0] - model[pos - 1][0]
                 current += "</span><span title=%s class=%s>" % (tooltip(pos), color)
+
+            if word == '':
+                current += '&nbsp'
 
             current += "%s " % word
             dif -= 1

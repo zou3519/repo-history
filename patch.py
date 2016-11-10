@@ -33,7 +33,7 @@ class Patch:
         self.start = start
         self.end = end
         self.length = end - start
-        self.content = str([line[1:] for line in content]) #"".join([line[1:] for line in content])
+        self.content = str([line[2:] for line in content]) #"".join([line[1:] for line in content])
         self.revision = revision
 
 
@@ -64,17 +64,27 @@ class PatchSet:
 
         # debugging
         diff = [line for line in diff]
+        # ignore helper lines
+        diff = [line for line in diff if not line.startswith('?')]
+        print("")
+        print("old: %s" % '\n'.join(old))
+        print("new: %s" % '\n'.join(new))
+        print("diffset: %s" % '\n'.join(diff))
+        print("")
 
         # Split the differences into Patches
         index = 0
+        deletes = 0
         for line in diff:
+
             if line[0] == ' ':
                 # If equal, terminate any current patch.
                 if ptype is not None:
                     ps.append_patch(
-                        Patch(pid, ptype, start, index, diff[start:index], rvid))
+                        Patch(pid, ptype, start, index, diff[start+deletes:index+deletes], rvid))
                     pid += 1
                     if ptype == PatchType.DELETE:
+                        deletes += index - start
                         index = start
                     ptype = None
                 index += 1
@@ -82,8 +92,9 @@ class PatchSet:
                 # If addition, terminate any current DELETE patch.
                 if ptype == PatchType.DELETE:
                     ps.append_patch(
-                        Patch(pid, ptype, start, index, diff[start:index], rvid))
+                        Patch(pid, ptype, start, index, diff[start+deletes:index+deletes], rvid))
                     pid += 1
+                    deletes += index - start
                     index = start
                     ptype = None
                 # Begin a new ADD patch, or extend an existing one.
@@ -95,7 +106,7 @@ class PatchSet:
                 # If deletion, terminate any current ADD patch.
                 if ptype == PatchType.ADD:
                     ps.append_patch(
-                        Patch(pid, ptype, start, index, diff[start:index], rvid))
+                        Patch(pid, ptype, start, index, diff[start+deletes:index+deletes], rvid))
                     pid += 1
                     ptype = None
                 # Begin a new DELETE patch, or extend an existing one.
@@ -107,7 +118,7 @@ class PatchSet:
 
         # Terminate and add any remaining patch.
         if ptype is not None:
-            ps.append_patch(Patch(pid, ptype, start, index, diff[start:index], rvid))
+            ps.append_patch(Patch(pid, ptype, start, index, diff[start+deletes:index+deletes], rvid))
 
         # print "Patch: "
         # print "".join([line[1:] for line in diff[start:index]])
@@ -133,6 +144,7 @@ class PatchModel:
         """
             Adds Patch, p, to the model and graph
         """
+        print("Insert patch: " + str(p.__dict__))
         self.graph.add_node(p.pid, time=timestamp, size=p.length)
         self.graph.node[p.pid]['patch'] = json.dumps(p.__dict__)
         if not self.model:
@@ -149,6 +161,8 @@ class PatchModel:
 
             # Case 1: Insertion into the middle of one edit
             if sin == ein:  # startindex == endindex
+                print(self.model)
+                print("sin: " + str(sin))
                 pid = self.model[sin][1]
                 if sin == 0:
                     start = 0

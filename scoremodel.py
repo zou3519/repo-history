@@ -20,13 +20,13 @@ class SimpleScoreModel(ScoreModel):
 
         for node in node_list:
             if type(node) != int:
-                node = int(node.decode("utf-8"))
+                node = int(node.decode("ascii"))
 
             height = 0
             for (src, dst, prob) in nx_graph.out_edges_iter(node, data='prob'):
                 if type(dst) != int:
-                    dst = int(dst.decode("utf-8"))
-                    src = int(src.decode("utf-8"))
+                    dst = int(dst.decode("ascii"))
+                    src = int(src.decode("ascii"))
                 height += (height_dict[dst] + nx_graph.edge[src][dst]['dist']) * prob
 
             height_dict[node] = height

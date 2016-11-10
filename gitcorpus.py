@@ -60,13 +60,13 @@ class GitRepoIter(CorpusRevisionIter):
         if exit_code:
             self.commits = []
         else:
-            self.commits = output.decode("utf-8").strip().split("\n")
+            self.commits = output.strip().split("\n")
         debug("Commits: " + str(self.commits))
 
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def next(self):
         if self.offset >= len(self.commits):
             print("Iterated over " + str(self.offset) + " commits")
             raise StopIteration()
@@ -86,7 +86,7 @@ class GitRepoIter(CorpusRevisionIter):
             raise StopIteration()
 
         self.offset += 1
-        content = content.decode('utf-8', 'replace')
+        # content = content.decode('ascii', 'replace')
         return (commit, float(timestamp), content)
 
 

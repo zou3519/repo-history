@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 import argparse
 from gitcorpus import *
 from corpus import *
@@ -26,6 +26,8 @@ def applyCodeModel(name, source, repo_path):
         (patch_model, content) = buildPatchModel(
             code_iterable, distance_model, patch_maker)
         save_to_cache(name + ".txt", patch_model, content)
+
+    print (patch_model.model)
 
     # I feel like scoring could take a while... cache score sometime?
     print ('Scoring patch model . . .')
