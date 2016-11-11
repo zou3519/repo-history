@@ -67,11 +67,11 @@ class PatchSet:
         diff = [line for line in diff]
         # ignore helper lines
         diff = [line for line in diff if not line.startswith('?')]
-        print("")
-        print("old: %s" % '\n'.join(old))
-        print("new: %s" % '\n'.join(new))
-        print("diffset: %s" % '\n'.join(diff))
-        print("")
+        # print("")
+        # print("old: %s" % '\n'.join(old))
+        # print("new: %s" % '\n'.join(new))
+        # print("diffset: %s" % '\n'.join(diff))
+        # print("")
 
         # Split the differences into Patches
         index = 0
@@ -135,12 +135,10 @@ class PatchModel:
         A PatchModel model gives ownership of indices of the current text to
             the Patch that last modified that section of text.
     """
-    model = []   # A sorted list of end indices and Patch IDs.
-    graph = nx.DiGraph()
 
-    def __init__(self, model=[], graph=nx.DiGraph()):
-        self.model = model
-        self.graph = graph
+    def __init__(self):
+        self.model = []
+        self.graph = nx.DiGraph()
 
     @classmethod
     def read_from_file(cls, filename):
@@ -153,7 +151,7 @@ class PatchModel:
         """
             Adds Patch, p, to the model and graph
         """
-        print("Insert patch: " + str(p.__dict__))
+        # print("Insert patch: " + str(p.__dict__))
         self.graph.add_node(p.pid, time=timestamp, size=p.length)
         self.graph.node[p.pid]['patch'] = json.dumps(p.__dict__)
         if not self.model:
@@ -170,8 +168,6 @@ class PatchModel:
 
             # Case 1: Insertion into the middle of one edit
             if sin == ein:  # startindex == endindex
-                print(self.model)
-                print("sin: " + str(sin))
                 pid = self.model[sin][1]
                 if sin == 0:
                     start = 0

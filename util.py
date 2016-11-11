@@ -16,7 +16,6 @@ def files(root, path):
 
     # Folder: return files recursively
     result = []
-    print ([x for x in os.walk(full_path)])
     for directory, folders, files in os.walk(full_path):
         for file in files:
             subdir = directory[len(root):]

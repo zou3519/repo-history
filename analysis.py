@@ -16,7 +16,8 @@ def buildPatchGraph(file_context):
     """Builds a patch graph. Returns patch graph and distances to compute"""
     git_repo = GitRepo(file_context.repo_path)
     offset = 0  # Do not change, other offsets probably don't work.
-    name = "bleh"
+    name = "bleh"  # TODO: get rid of this
+    print(file_context.source_path)
     corpus_rev_iter = GitRepoIter(
         name, git_repo, file_context.source_path, offset)
     patch_maker = OldPatchMaker()
@@ -156,14 +157,17 @@ def main():
     source_path = args.source[0]
     analysis_context = GitContext(repo_path, source_path)
 
+    print("Entering patch model phase")
     patch_graphs_dict = create_patch_models(analysis_name, analysis_context)
+    print("Entering distances phase")
     distances = compute_distances(
         analysis_name, analysis_context, patch_graphs_dict, BasicDistanceModel)
+    print("Entering scores phase")
     scores = compute_scores(
         analysis_name, analysis_context, patch_graphs_dict, distances, SimpleScoreModel)
 
-    print distances.dict
-    print scores.dict
+    # print distances.dict
+    # print scores.dict
 
     # # # build patch graph
     # print(files)

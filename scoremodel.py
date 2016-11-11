@@ -18,8 +18,6 @@ class SimpleScoreModel(ScoreModel):
         node_list = nx.topological_sort(nx_graph, reverse=True)
         height_dict = {}
 
-        print(node_list)
-
         for node in node_list:
             if type(node) != int:
                 node = int(node.decode("ascii"))

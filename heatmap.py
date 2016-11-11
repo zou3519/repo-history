@@ -97,7 +97,7 @@ def colorHUSL(title, remove, metricName, model, content, colors, metricDict):
     content = content.split("\n")
     # content = [(line.split(), whitespace2html(beginning_whitespace(line))) for line in content]
     content = [([line], whitespace2html(beginning_whitespace(line))) for line in content]
-    print(content)
+    # print(content)
     # content = [re.split(r'(\s+)', line) for line in content]
     # print content
 
