@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+import cPickle as pickle
 import bisect
 import difflib
 import networkx as nx
@@ -33,7 +33,8 @@ class Patch:
         self.start = start
         self.end = end
         self.length = end - start
-        self.content = str([line[2:] for line in content]) #"".join([line[1:] for line in content])
+        # "".join([line[1:] for line in content])
+        self.content = str([line[2:] for line in content])
         self.revision = revision
 
 
@@ -81,7 +82,7 @@ class PatchSet:
                 # If equal, terminate any current patch.
                 if ptype is not None:
                     ps.append_patch(
-                        Patch(pid, ptype, start, index, diff[start+deletes:index+deletes], rvid))
+                        Patch(pid, ptype, start, index, diff[start + deletes:index + deletes], rvid))
                     pid += 1
                     if ptype == PatchType.DELETE:
                         deletes += index - start
@@ -92,7 +93,7 @@ class PatchSet:
                 # If addition, terminate any current DELETE patch.
                 if ptype == PatchType.DELETE:
                     ps.append_patch(
-                        Patch(pid, ptype, start, index, diff[start+deletes:index+deletes], rvid))
+                        Patch(pid, ptype, start, index, diff[start + deletes:index + deletes], rvid))
                     pid += 1
                     deletes += index - start
                     index = start
@@ -106,7 +107,7 @@ class PatchSet:
                 # If deletion, terminate any current ADD patch.
                 if ptype == PatchType.ADD:
                     ps.append_patch(
-                        Patch(pid, ptype, start, index, diff[start+deletes:index+deletes], rvid))
+                        Patch(pid, ptype, start, index, diff[start + deletes:index + deletes], rvid))
                     pid += 1
                     ptype = None
                 # Begin a new DELETE patch, or extend an existing one.
@@ -118,7 +119,8 @@ class PatchSet:
 
         # Terminate and add any remaining patch.
         if ptype is not None:
-            ps.append_patch(Patch(pid, ptype, start, index, diff[start+deletes:index+deletes], rvid))
+            ps.append_patch(Patch(pid, ptype, start, index, diff[
+                            start + deletes:index + deletes], rvid))
 
         # print "Patch: "
         # print "".join([line[1:] for line in diff[start:index]])
@@ -140,7 +142,14 @@ class PatchModel:
         self.model = model
         self.graph = graph
 
-    def apply_patch(self, p, timestamp, dist):
+    @classmethod
+    def read_from_file(cls, filename):
+        return pickle.load(open(filename, 'rb'))
+
+    def save_to_file(self, filename):
+        pickle.dump(self, open(filename, 'wb'))
+
+    def apply_patch(self, p, timestamp):
         """
             Adds Patch, p, to the model and graph
         """
@@ -169,7 +178,7 @@ class PatchModel:
                 else:
                     start = self.model[sin - 1][0]
                 length = self.model[sin][0] - start
-                self.graph.add_edge(p.pid, pid, prob=1.0, dist=dist)
+                self.graph.add_edge(p.pid, pid, prob=1.0)
 
             # Case 2: Insertion between 2 edits or at the end of the document
             elif (ein - sin) == 1:
@@ -189,7 +198,7 @@ class PatchModel:
                     length = end - nstart
                     nstart = end
                     prob = float(length) / total
-                    self.graph.add_edge(p.pid, pid, prob=prob, dist=dist)
+                    self.graph.add_edge(p.pid, pid, prob=prob)
 
             # Case 3: Replacement, insertion depends on deletions
             else:
@@ -219,7 +228,7 @@ class PatchModel:
                     if length == 0:
                         length = self.graph.node[pid]['size']
                         prob = float(length) / total
-                        self.graph.add_edge(p.pid, pid, prob=prob, dist=dist)
+                        self.graph.add_edge(p.pid, pid, prob=prob)
 
             # Remove intermediates if present.
             # Leave the first preceeding Patch
@@ -273,7 +282,7 @@ class PatchModel:
                     length = self.graph.node[pid]['size']
                 prob = float(length) / total
 
-                self.graph.add_edge(p.pid, pid, prob=prob, dist=dist)
+                self.graph.add_edge(p.pid, pid, prob=prob)
 
             # Adjust indices to include Patches that end where p starts
             #   or end where p ends.

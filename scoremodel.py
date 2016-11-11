@@ -13,10 +13,12 @@ class ScoreModel(object):
 
 class SimpleScoreModel(ScoreModel):
 
-    def score(self, nx_graph):
+    def score(self, nx_graph, distance_dict, analysis_context):
         """Compute weighted distance to the root node"""
         node_list = nx.topological_sort(nx_graph, reverse=True)
         height_dict = {}
+
+        print(node_list)
 
         for node in node_list:
             if type(node) != int:
@@ -27,7 +29,13 @@ class SimpleScoreModel(ScoreModel):
                 if type(dst) != int:
                     dst = int(dst.decode("ascii"))
                     src = int(src.decode("ascii"))
-                height += (height_dict[dst] + nx_graph.edge[src][dst]['dist']) * prob
+                src_rev = eval(nx_graph.node[src]['patch'])['revision']
+                dst_rev = eval(nx_graph.node[dst]['patch'])['revision']
+                key = (dst_rev, src_rev)
+                if key not in distance_dict:
+                    print "could not find key computation"
+                edge_value = distance_dict[key]
+                height += (height_dict[dst] + edge_value) * prob
 
             height_dict[node] = height
 

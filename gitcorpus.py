@@ -4,6 +4,14 @@ from subprocess import Popen, PIPE
 from corpus import *
 
 
+class GitContext(CorpusContext):
+
+    def __init__(self, repo_path, source_path):
+        """source_path can be a folder or a file"""
+        self.repo_path = repo_path
+        self.source_path = source_path
+
+
 class GitRepo(object):
     """Handy-dandy operations for a git repo"""
 
