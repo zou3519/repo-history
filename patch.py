@@ -38,6 +38,51 @@ class Patch:
         self.revision = revision
 
 
+def reorder_diff(diff):
+    """Preprocess so if there is a contiguous string of only +- (no space), the - comes before +"""
+    def is_plus(line):
+        return line[0] == '+'
+
+    def is_minus(line):
+        return line[0] == '-'
+
+    def is_land(line):
+        return line[0] != ' '
+
+    def at_world_edge(index, diff):
+        return index + 1 == len(diff)
+
+    def record_land(line, minus, plus):
+        if is_plus(line):
+            plus.append(line)
+        elif is_minus(line):
+            minus.append(line)
+
+    in_island = False
+    start = 0
+    minus, plus = [], []
+    for index in xrange(0, len(diff)):
+        unit = diff[index]
+        if not in_island:
+            if not is_land(unit):
+                continue
+            in_island = True
+            start = index
+
+        # Currently on island
+        if is_land(unit):
+            record_land(unit, minus, plus)
+
+        # Next unit is not island anymore
+        if not is_land(unit) or at_world_edge(index, diff):
+            end = index + (1 if at_world_edge(index, diff) else 0)
+            minus.extend(plus)
+            for i in xrange(start, end):
+                diff[i] = minus[i - start]
+            in_island = False
+            plus, minus = [], []
+
+
 class PatchSet:
     """
         A PatchSet is a list of Patches (edits) that belong to the
@@ -67,6 +112,9 @@ class PatchSet:
         diff = [line for line in diff]
         # ignore helper lines
         diff = [line for line in diff if not line.startswith('?')]
+        reorder_diff(diff)
+        print("diffset: \n%s" % '\n'.join(diff))
+
         # print("")
         # print("old: %s" % '\n'.join(old))
         # print("new: %s" % '\n'.join(new))
