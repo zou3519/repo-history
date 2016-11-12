@@ -58,6 +58,11 @@ def reorder_diff(diff):
         elif is_minus(line):
             minus.append(line)
 
+    def replace(diff, minus, plus, start, end):
+        minus.extend(plus)
+        for i in xrange(start, end):
+            diff[i] = minus[i - start]
+
     in_island = False
     start = 0
     minus, plus = [], []
@@ -74,11 +79,12 @@ def reorder_diff(diff):
             record_land(unit, minus, plus)
 
         # Next unit is not island anymore
-        if not is_land(unit) or at_world_edge(index, diff):
-            end = index + (1 if at_world_edge(index, diff) else 0)
-            minus.extend(plus)
-            for i in xrange(start, end):
-                diff[i] = minus[i - start]
+        if not is_land(unit):
+            replace(diff, minus, plus, start, index)
+            in_island = False
+            plus, minus = [], []
+        elif at_world_edge(index, diff):
+            replace(diff, minus, plus, start, index + 1)
             in_island = False
             plus, minus = [], []
 
