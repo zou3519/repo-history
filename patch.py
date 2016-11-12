@@ -123,7 +123,6 @@ class PatchSet:
         ptype = None
         ps = cls()
         start = None
-        pid = pid_pool.next_pid()
 
         # Obtain a list of differences between the texts
         diff = difflib.ndiff(old, new)
@@ -154,8 +153,7 @@ class PatchSet:
                 # If equal, terminate any current patch.
                 if ptype is not None:
                     ps.append_patch(
-                        Patch(pid, ptype, start, index, diff[start + deletes:index + deletes], rvid))
-                    pid = pid_pool.next_pid()
+                        Patch(pid_pool.next_pid(), ptype, start, index, diff[start + deletes:index + deletes], rvid))
                     if ptype == PatchType.DELETE:
                         deletes += index - start
                         index = start
@@ -165,8 +163,7 @@ class PatchSet:
                 # If addition, terminate any current DELETE patch.
                 if ptype == PatchType.DELETE:
                     ps.append_patch(
-                        Patch(pid, ptype, start, index, diff[start + deletes:index + deletes], rvid))
-                    pid = pid_pool.next_pid()
+                        Patch(pid_pool.next_pid(), ptype, start, index, diff[start + deletes:index + deletes], rvid))
                     deletes += index - start
                     index = start
                     ptype = None
@@ -179,8 +176,7 @@ class PatchSet:
                 # If deletion, terminate any current ADD patch.
                 if ptype == PatchType.ADD:
                     ps.append_patch(
-                        Patch(pid, ptype, start, index, diff[start + deletes:index + deletes], rvid))
-                    pid = pid_pool.next_pid()
+                        Patch(pid_pool.next_pid(), ptype, start, index, diff[start + deletes:index + deletes], rvid))
                     ptype = None
                 # Begin a new DELETE patch, or extend an existing one.
                 if ptype is None:
@@ -191,7 +187,7 @@ class PatchSet:
 
         # Terminate and add any remaining patch.
         if ptype is not None:
-            ps.append_patch(Patch(pid, ptype, start, index, diff[
+            ps.append_patch(Patch(pid_pool.next_pid(), ptype, start, index, diff[
                             start + deletes:index + deletes], rvid))
 
         # print "Patch: "
