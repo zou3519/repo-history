@@ -12,7 +12,7 @@ from caching import *
 import util
 
 
-def buildPatchGraph(file_context):
+def buildPatchGraph(file_context, pid_pool):
     """Builds a patch graph. Returns patch graph and distances to compute"""
     git_repo = GitRepo(file_context.repo_path)
     offset = 0  # Do not change, other offsets probably don't work.
@@ -20,7 +20,7 @@ def buildPatchGraph(file_context):
     print(file_context.source_path)
     corpus_rev_iter = GitRepoIter(
         name, git_repo, file_context.source_path, offset)
-    patch_maker = OldPatchMaker()
+    patch_maker = OldPatchMaker(pid_pool)
 
     patch_model = PatchModel()
     prev_content = ''
@@ -60,8 +60,10 @@ def create_patch_models(analysis_name, analysis_context, check_cache=True, save_
             return patch_graphs_dict
 
     files = util.files(repo_path, source_path)
+    num_files = len(files)
     file_contexts = map(lambda file: GitContext(repo_path, file), files)
-    patch_graphs = map(lambda context: buildPatchGraph(context), file_contexts)
+    pid_pools = map(lambda k: PidPool(k, num_files), xrange(len(files)))
+    patch_graphs = map(lambda args: buildPatchGraph(*args), zip(file_contexts, pid_pools))
     patch_graphs_dict = dict(zip(files, patch_graphs))
 
     if save_to_cache:

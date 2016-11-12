@@ -9,6 +9,20 @@ import json
 #   PatchSets, and the history of ownership of text as a PatchModel
 
 
+class PidPool(object):
+
+    def __init__(self, num, total):
+        assert(num < total)
+        self.num = num
+        self.total = total
+        self.next = num
+
+    def next_pid(self):
+        result = self.next
+        self.next += self.total
+        return result
+
+
 class PatchType:
     """
         Add if text was inserted. Delete if text was removed
@@ -101,7 +115,7 @@ class PatchSet:
         self.patches = []
 
     @classmethod
-    def psdiff(cls, startid, old, new, rvid):
+    def psdiff(cls, pid_pool, old, new, rvid):
         """
             Compares 2 vesions of text at a word level to identify 
                 the individual edits (insertions and deletions).
@@ -109,17 +123,21 @@ class PatchSet:
         ptype = None
         ps = cls()
         start = None
-        pid = startid
+        pid = pid_pool.next_pid()
 
         # Obtain a list of differences between the texts
         diff = difflib.ndiff(old, new)
+
+        # unified_diff = difflib.unified_diff(old, new)
+        # for line in unified_diff:
+        #     print(line)
 
         # debugging
         diff = [line for line in diff]
         # ignore helper lines
         diff = [line for line in diff if not line.startswith('?')]
         reorder_diff(diff)
-        print("diffset: \n%s" % '\n'.join(diff))
+        # print("diffset: \n%s" % '\n'.join(diff))
 
         # print("")
         # print("old: %s" % '\n'.join(old))
@@ -137,7 +155,7 @@ class PatchSet:
                 if ptype is not None:
                     ps.append_patch(
                         Patch(pid, ptype, start, index, diff[start + deletes:index + deletes], rvid))
-                    pid += 1
+                    pid = pid_pool.next_pid()
                     if ptype == PatchType.DELETE:
                         deletes += index - start
                         index = start
@@ -148,7 +166,7 @@ class PatchSet:
                 if ptype == PatchType.DELETE:
                     ps.append_patch(
                         Patch(pid, ptype, start, index, diff[start + deletes:index + deletes], rvid))
-                    pid += 1
+                    pid = pid_pool.next_pid()
                     deletes += index - start
                     index = start
                     ptype = None
@@ -162,7 +180,7 @@ class PatchSet:
                 if ptype == PatchType.ADD:
                     ps.append_patch(
                         Patch(pid, ptype, start, index, diff[start + deletes:index + deletes], rvid))
-                    pid += 1
+                    pid = pid_pool.next_pid()
                     ptype = None
                 # Begin a new DELETE patch, or extend an existing one.
                 if ptype is None:
@@ -206,7 +224,8 @@ class PatchModel:
             Adds Patch, p, to the model and graph
         """
         # print("Insert patch: " + str(p.__dict__))
-        self.graph.add_node(p.pid, time=timestamp, size=p.length)
+        self.graph.add_node(p.pid, time=timestamp,
+                            size=p.length, rev=p.revision)
         self.graph.node[p.pid]['patch'] = json.dumps(p.__dict__)
         if not self.model:
             self.model.append((p.end, p.pid))
