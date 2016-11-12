@@ -87,6 +87,8 @@ def graph_to_cytoscope(nx_graph, distances, scores):
         tgt_rev = eval(nodes[link['target']]['data']['patch'])['revision']
         dist = distances.dict[(tgt_rev, src_rev)]
         link['dist'] = dist
+        link['source'] = nodes[link['source']]['data']['id']
+        link['target'] = nodes[link['target']]['data']['id']
         edges.append({'data': link})
 
     return json.dumps({'nodes': nodes, 'edges': edges})
