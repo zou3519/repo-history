@@ -27,8 +27,8 @@ class SimpleScoreModel(ScoreModel):
                 if type(dst) != int:
                     dst = int(dst.decode("ascii"))
                     src = int(src.decode("ascii"))
-                src_rev = eval(nx_graph.node[src]['patch'])['revision']
-                dst_rev = eval(nx_graph.node[dst]['patch'])['revision']
+                src_rev = nx_graph.node[src]['rev']
+                dst_rev = nx_graph.node[dst]['rev']
                 key = (dst_rev, src_rev)
                 if key not in distance_dict:
                     print "could not find key computation"

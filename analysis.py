@@ -85,8 +85,8 @@ def required_distances(nx_graph):
             if type(src) != int:
                 src = int(src.decode("ascii"))
 
-            src_rev = eval(nx_graph.node[src]['patch'])['revision']
-            dst_rev = eval(nx_graph.node[dst]['patch'])['revision']
+            src_rev = nx_graph.node[src]['rev']
+            dst_rev = nx_graph.node[dst]['rev']
             required_distances.add((dst_rev, src_rev))
 
     return required_distances
