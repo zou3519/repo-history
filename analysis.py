@@ -9,7 +9,12 @@ from patch import *
 from examinegraph import *
 from heatmap import *
 from caching import *
+from pathos.multiprocessing import ProcessingPool
 import util
+
+
+# Number of processes to use. Yes, processes, not threads.
+nthreads = 1
 
 
 def buildPatchGraph(file_context, pid_pool):
@@ -43,7 +48,8 @@ def parse_args():
                         help='Path to the repo the file lives in.')
     parser.add_argument('--name', dest='name', type=str, required=True,
                         help='The name of this analysis')
-
+    parser.add_argument('--nthreads', dest='nthreads', type=int, default=1,
+                        help='Number of processes to run')
     return parser.parse_args()
 
 
@@ -63,13 +69,25 @@ def create_patch_models(analysis_name, analysis_context, check_cache=True, save_
     num_files = len(files)
     file_contexts = map(lambda file: GitContext(repo_path, file), files)
     pid_pools = map(lambda k: PidPool(k, num_files), xrange(len(files)))
-    patch_graphs = map(lambda args: buildPatchGraph(*args), zip(file_contexts, pid_pools))
+
+    mapfn = pp_mapfn()
+    patch_graphs = mapfn(lambda args: buildPatchGraph(
+        *args), zip(file_contexts, pid_pools))
+
     patch_graphs_dict = dict(zip(files, patch_graphs))
 
     if save_to_cache:
         save_patch_models(analysis_name, patch_graphs_dict)
 
     return patch_graphs_dict
+
+
+def pp_mapfn():
+    if nthreads <= 1:
+        return map
+
+    pool = ProcessingPool(nthreads)
+    return pool.map
 
 
 def required_distances(nx_graph):
@@ -153,7 +171,10 @@ def compute_scores(analysis_name, analysis_context, patch_graphs_dict, distances
 
 
 def main():
+    global nthreads
+
     args = parse_args()
+    nthreads = args.nthreads
     analysis_name = args.name
     repo_path = args.repo_path
     source_path = args.source[0]
