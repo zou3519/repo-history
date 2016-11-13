@@ -207,6 +207,7 @@ class PatchModel:
     def __init__(self):
         self.model = []
         self.graph = nx.DiGraph()
+        self.rev_to_pids = {}
 
     @classmethod
     def read_from_file(cls, filename):
@@ -219,10 +220,16 @@ class PatchModel:
         """
             Adds Patch, p, to the model and graph
         """
-        # print("Insert patch: " + str(p.__dict__))
+        # Insert into graph with metadata
         self.graph.add_node(p.pid, time=timestamp,
                             size=p.length, rev=p.revision)
         self.graph.node[p.pid]['patch'] = json.dumps(p.__dict__)
+
+        # Update rev_to_pids mapping
+        if p.revision not in self.rev_to_pids:
+            self.rev_to_pids[p.revision] = set()
+        self.rev_to_pids[p.revision].add(p.pid)
+
         if not self.model:
             self.model.append((p.end, p.pid))
 

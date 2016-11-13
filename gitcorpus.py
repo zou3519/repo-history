@@ -41,6 +41,11 @@ class GitRepo(object):
         command = '%s show -s --format=%%at %s' % (self.git, commit)
         return self.run_command(command)
 
+    def log_line_with_grep(self, grep, path):
+        command = "%s log --grep='%s' --pretty=oneline -- %s" % (
+            self.git, grep, path)
+        return self.run_command(command)
+
     def run_command(self, command):
         debug(command)
         process = Popen(shlex.split(command), stdout=PIPE)
