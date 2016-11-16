@@ -2,6 +2,7 @@ import shlex
 import logging
 from subprocess import Popen, PIPE
 from corpus import *
+from distancemodel import CorpusDistModel
 
 
 class GitContext(CorpusContext):
@@ -35,6 +36,10 @@ class GitRepo(object):
             path is the path to the file.
         """
         command = '%s show %s:%s' % (self.git, commit, path)
+        return self.run_command(command)
+
+    def diff(self, old_rev, as_rev, path):
+        command = '%s diff %s %s -- %s' % (self.git, old_rev, as_rev, path)
         return self.run_command(command)
 
     def commit_time(self, commit):
@@ -101,6 +106,30 @@ class GitRepoIter(CorpusRevisionIter):
         self.offset += 1
         # content = content.decode('ascii', 'replace')
         return (commit, float(timestamp), content)
+
+
+class GitDiffDistModel(CorpusDistModel):
+
+    def __init__(self, repo_path):
+        self.git_repo = GitRepo(repo_path)
+
+    def distance(self, analysis_context, old_rev, new_rev):
+        if old_rev == new_rev:
+            return 0
+
+        (exit_code, diff, err) = self.git_repo.diff(
+            old_rev, new_rev, analysis_context.source_path)
+        if exit_code:
+            debug("Git diff failed: git diff %s %s %s" % (old_rev,
+                                                          new_rev, analysis_context.source_path))
+            assert(False)  # Try again?
+
+        lines = diff.split('\n')
+        result = 0
+        for line in lines:
+            if line.startswith('+') or line.startswith('-'):
+                result += 1
+        return result
 
 
 def debug(string):

@@ -128,9 +128,11 @@ def compute_distances(analysis_name, analysis_context, patch_graphs_dict, distan
         patch_model.graph), patch_graphs_dict.values())
     required = util.flattensets(required_dists_sets)
     dists_dict = {}
-    for (dst_rev, src_rev) in required:
-        dist = distance_model.distance(analysis_context, dst_rev, src_rev)
-        dists_dict[(dst_rev, src_rev)] = dist
+
+    mapfn = pp_mapfn()
+    dists = mapfn(lambda (dst_rev, src_rev): distance_model.distance(
+        analysis_context, dst_rev, src_rev), required)
+    dists_dict = dict(zip(required, dists))
 
     distances = Distances(analysis_name, dists_dict, descriptor)
     if save_to_cache:
@@ -170,6 +172,10 @@ def compute_scores(analysis_name, analysis_context, patch_graphs_dict, distances
     return scores
 
 
+def git_diff_dist_model_ctor(repo_path):
+    return (lambda: GitDiffDistModel(repo_path))
+
+
 def main():
     global nthreads
 
@@ -183,8 +189,9 @@ def main():
     print("Entering patch model phase")
     patch_graphs_dict = create_patch_models(analysis_name, analysis_context)
     print("Entering distances phase")
+    dist_model_ctor = git_diff_dist_model_ctor(repo_path)
     distances = compute_distances(
-        analysis_name, analysis_context, patch_graphs_dict, BasicDistanceModel)
+        analysis_name, analysis_context, patch_graphs_dict, dist_model_ctor)
     print("Entering scores phase")
     scores = compute_scores(
         analysis_name, analysis_context, patch_graphs_dict, distances, SimpleScoreModel)

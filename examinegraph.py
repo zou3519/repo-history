@@ -18,8 +18,8 @@ def main():
     args = parse_args()
     examine_graph(args.analysis_name, args.filekey,
                   args.dist_descriptor, args.score_descriptor, args.outfile_name)
-    os.system('google-chrome %s%s/%s' %
-              (graph_generation_path, args.outfile_name, graph_template_file))
+    # os.system('google-chrome %s%s/%s' %
+    #           (graph_generation_path, args.outfile_name, graph_template_file))
 
 
 def parse_args():
@@ -60,6 +60,7 @@ def examine_graph(analysis_name, filekey, dist_descriptor, score_descriptor, out
 def build_viz_from_graph(name, nx_graph, distances, scores):
     elements = graph_to_cytoscope(nx_graph, distances, scores)
 
+    nx.write_graphml(nx_graph, "/home/rzou/Dropbox/kleebox/" + name + ".xml")
     # inject elements into new html file
     graph_path = graph_generation_path + name
     template_file = graph_path + '/' + graph_template_file
