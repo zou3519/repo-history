@@ -113,7 +113,7 @@ class GitDiffDistModel(CorpusDistModel):
     def __init__(self, repo_path):
         self.git_repo = GitRepo(repo_path)
 
-    def distance(self, analysis_context, old_rev, new_rev):
+    def distance(self, analysis_context, old_rev, new_rev, filekey):
         if old_rev == new_rev:
             return 0
 

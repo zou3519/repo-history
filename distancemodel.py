@@ -15,7 +15,7 @@ class CorpusDistModel(object):
 class BasicDistanceModel(CorpusDistModel):
     """Distance between adjacent revisions is always 1"""
 
-    def distance(self, analysis_context, old_rev, new_rev):
+    def distance(self, analysis_context, old_rev, new_rev, filekey):
         return 1 if old_rev != new_rev else 0
 
 

@@ -54,13 +54,13 @@ def examine_graph(analysis_name, filekey, dist_descriptor, score_descriptor, out
     full_descriptor = score_descriptor + "_" + dist_descriptor
     scores = Scores.read_from_file(analysis_name, full_descriptor)
 
-    build_viz_from_graph(outfile_name, patch_model.graph, distances, scores)
+    build_viz_from_graph(outfile_name, patch_model.graph, distances, scores, filekey)
 
 
-def build_viz_from_graph(name, nx_graph, distances, scores):
-    elements = graph_to_cytoscope(nx_graph, distances, scores)
+def build_viz_from_graph(name, nx_graph, distances, scores, filekey):
+    elements = graph_to_cytoscope(nx_graph, distances, scores, filekey)
 
-    nx.write_graphml(nx_graph, "/home/rzou/Dropbox/kleebox/" + name + ".xml")
+    # nx.write_graphml(nx_graph, "/home/rzou/Dropbox/kleebox/" + name + ".xml")
     # inject elements into new html file
     graph_path = graph_generation_path + name
     template_file = graph_path + '/' + graph_template_file
@@ -74,7 +74,7 @@ def build_viz_from_graph(name, nx_graph, distances, scores):
         content_file.write(new_content)
 
 
-def graph_to_cytoscope(nx_graph, distances, scores):
+def graph_to_cytoscope(nx_graph, distances, scores, filekey):
     nodes = []
     edges = []
     data = json_graph.node_link_data(nx_graph)
@@ -86,7 +86,7 @@ def graph_to_cytoscope(nx_graph, distances, scores):
     for link in data['links']:
         src_rev = nodes[link['source']]['data']['rev']
         tgt_rev = nodes[link['target']]['data']['rev']
-        dist = distances.dict[(tgt_rev, src_rev)]
+        dist = distances.dict[(tgt_rev, src_rev, filekey)]
         link['dist'] = dist
         link['source'] = nodes[link['source']]['data']['id']
         link['target'] = nodes[link['target']]['data']['id']

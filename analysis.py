@@ -90,7 +90,7 @@ def pp_mapfn():
     return pool.map
 
 
-def required_distances(nx_graph):
+def required_distances(key, nx_graph):
 
     required_distances = set()
     node_list = nx.topological_sort(nx_graph, reverse=True)
@@ -107,7 +107,7 @@ def required_distances(nx_graph):
 
             src_rev = nx_graph.node[src]['rev']
             dst_rev = nx_graph.node[dst]['rev']
-            required_distances.add((dst_rev, src_rev))
+            required_distances.add((dst_rev, src_rev, key))
 
     return required_distances
 
@@ -124,14 +124,15 @@ def compute_distances(analysis_name, analysis_context, patch_graphs_dict, distan
             print "Read cached distances object %s" % descriptor
             return distances_obj
 
-    required_dists_sets = map(lambda patch_model: required_distances(
-        patch_model.graph), patch_graphs_dict.values())
+    # (rev, rev, None | filekey) 
+    required_dists_sets = map(lambda (key, patch_model): required_distances(key,
+        patch_model.graph), patch_graphs_dict.iteritems())
     required = util.flattensets(required_dists_sets)
     dists_dict = {}
 
     mapfn = pp_mapfn()
-    dists = mapfn(lambda (dst_rev, src_rev): distance_model.distance(
-        analysis_context, dst_rev, src_rev), required)
+    dists = mapfn(lambda (dst_rev, src_rev, filekey): distance_model.distance(
+        analysis_context, dst_rev, src_rev, filekey), required)
     dists_dict = dict(zip(required, dists))
 
     distances = Distances(analysis_name, dists_dict, descriptor)
@@ -140,10 +141,10 @@ def compute_distances(analysis_name, analysis_context, patch_graphs_dict, distan
     return distances
 
 
-def compute_scores_helper(analysis_context, patch_model, distances_dict, score_model_ctor):
+def compute_scores_helper(analysis_context, patch_model, filekey, distances_dict, score_model_ctor):
     score_model = score_model_ctor()
     score_dict = score_model.score(
-        patch_model.graph, distances_dict, analysis_context)
+        patch_model.graph, distances_dict, analysis_context, filekey)
     return score_dict
 
 
@@ -159,8 +160,8 @@ def compute_scores(analysis_name, analysis_context, patch_graphs_dict, distances
             print "Read cached scores object %s" % full_descriptor
             return scores_obj
 
-    scores_dicts = map(lambda patch_model: compute_scores_helper(
-        analysis_context, patch_model, distances.dict, score_model_ctor), patch_graphs_dict.values())
+    scores_dicts = map(lambda (filekey, patch_model): compute_scores_helper(
+        analysis_context, patch_model, filekey, distances.dict, score_model_ctor), patch_graphs_dict.iteritems())
     scores_dict = {}
     for partial_dict in scores_dicts:
         scores_dict.update(partial_dict)
