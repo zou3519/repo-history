@@ -11,6 +11,7 @@ from heatmap import *
 from caching import *
 from pathos.multiprocessing import ProcessingPool
 import util
+from mossdist import MossDistModel
 
 
 # Number of processes to use. Yes, processes, not threads.
@@ -190,7 +191,8 @@ def main():
     print("Entering patch model phase")
     patch_graphs_dict = create_patch_models(analysis_name, analysis_context)
     print("Entering distances phase")
-    dist_model_ctor = git_diff_dist_model_ctor(repo_path)
+    # dist_model_ctor = git_diff_dist_model_ctor(repo_path)
+    dist_model_ctor = MossDistModel
     distances = compute_distances(
         analysis_name, analysis_context, patch_graphs_dict, dist_model_ctor)
     print("Entering scores phase")
