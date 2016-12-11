@@ -49,6 +49,8 @@ def parse_args():
                         help='Path to the repo the file lives in.')
     parser.add_argument('--name', dest='name', type=str, required=True,
                         help='The name of this analysis')
+    parser.add_argument('--distmodel', dest='distmodel', type=str, required=True,
+                        help='Distance model name (GitDiffDistModel | MossDistModel)')
     parser.add_argument('--nthreads', dest='nthreads', type=int, default=1,
                         help='Number of processes to run')
     return parser.parse_args()
@@ -178,6 +180,16 @@ def git_diff_dist_model_ctor(repo_path):
     return (lambda: GitDiffDistModel(repo_path))
 
 
+def get_dist_model_ctor(name, repo_path):
+    if name == 'MossDistModel':
+        return MossDistModel
+    elif name == 'GitDiffDistModel':
+        return git_diff_dist_model_ctor(repo_path)
+    else:
+        assert(False)
+
+
+
 def main():
     global nthreads
 
@@ -186,13 +198,13 @@ def main():
     analysis_name = args.name
     repo_path = args.repo_path
     source_path = args.source[0]
+    dist_model_name = args.distmodel
     analysis_context = GitContext(repo_path, source_path)
 
     print("Entering patch model phase")
     patch_graphs_dict = create_patch_models(analysis_name, analysis_context)
     print("Entering distances phase")
-    # dist_model_ctor = git_diff_dist_model_ctor(repo_path)
-    dist_model_ctor = MossDistModel
+    dist_model_ctor = get_dist_model_ctor(dist_model_name, repo_path)
     distances = compute_distances(
         analysis_name, analysis_context, patch_graphs_dict, dist_model_ctor)
     print("Entering scores phase")

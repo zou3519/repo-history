@@ -27,7 +27,6 @@ class MossDistModel(CorpusDistModel):
                 if num is None:
                     continue
                 p.append(num)
-                print(num)
                 if len(p) == 2:
                     # be careful :P
                     subprocess.call('rm -rf ' + tmppath, shell=True)
