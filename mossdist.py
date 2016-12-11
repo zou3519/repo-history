@@ -2,9 +2,15 @@ import subprocess
 import random
 import re
 from distancemodel import CorpusDistModel
+import os
 
-MOSS_LOCAL = "/home/richard/mosslocal"
-TMPHOME = "/home/richard/tmp/"
+# TODO: clean this up?
+# MOSS_PATH = "/home/richard/mosslocal"
+# MOSS_SCRATCH = "/home/richard/tmp/"
+MOSS_PATH = os.environ['MOSS_PATH']
+print("Using MOSS_PATH=" + MOSS_PATH)
+MOSS_SCRATCH = os.environ['MOSS_SCRATCH']
+print("USING MOSS_PATH=" + MOSS_SCRATCH)
 
 class MossDistModel(CorpusDistModel):
 
@@ -12,10 +18,11 @@ class MossDistModel(CorpusDistModel):
         if old_rev == new_rev:
             return 0
 
-        tmppath = TMPHOME + str(random.randint(1000000000, 9999999999)) + '/'
+        tmppath = MOSS_SCRATCH + str(random.randint(1000000000, 9999999999)) + '/'
 
         exit_code = subprocess.call(
-            './runmoss.sh %s %s %s %s %s %s' % (MOSS_LOCAL, analysis_context.repo_path + "/", old_rev, new_rev, filekey, tmppath), 
+            './runmoss.sh %s %s %s %s %s %s' % (
+                MOSS_PATH, analysis_context.repo_path + "/", old_rev, new_rev, filekey, tmppath), 
             shell=True)
         if exit_code:
             assert(False)
