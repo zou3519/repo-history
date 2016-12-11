@@ -9,6 +9,8 @@
 
 cd $1
 mkdir $6
+# echo "git --git-dir=$2.git --work-tree=$2 show $3:$5 > $6/rev1.c"
+# echo "git --git-dir=$2.git --work-tree=$2 show $4:$5 > $6/rev2.c"
 git --git-dir=$2.git --work-tree=$2 show $3:$5 > $6/rev1.c
 git --git-dir=$2.git --work-tree=$2 show $4:$5 > $6/rev2.c
 ./moss.pl -l c -o $6out $6/rev1.c $6/rev2.c

@@ -39,7 +39,8 @@ class MossDistModel(CorpusDistModel):
                     subprocess.call('rm -rf ' + tmppath, shell=True)
                     return (200. - p[0] - p[1])/200
 
-        assert(False)
+        # Lines did not match at all
+        return 1
 
 def find_percent(line):
     m = re.search('\(.+%\)', line)
