@@ -25,9 +25,11 @@ def examinebugs(repo_path, source_path, analysis_name, dist_desc, score_desc):
     if patch_graphs_dict is None:
         print("Could not find cached patch graph")
         return
+    print "Read patch models"
 
     (revs, msgs) = zip(*bugfix_revisions(analysis_context, 'bugzilla'))
     bug_rating_dict = compute_bug_ratings(patch_graphs_dict, revs)
+    print "Computed bug ratings"
     # print(bug_rating_dict)
 
     scores_obj = Scores.read_from_file(analysis_name, score_desc + "_" + dist_desc)
@@ -36,6 +38,7 @@ def examinebugs(repo_path, source_path, analysis_name, dist_desc, score_desc):
         return
 
     # Write csv of (pid, score, rating)
+    print "Creating output csv"
     series_name = score_desc + "_" + dist_desc
     df = pd.DataFrame(columns=[series_name,'rating'])
     for pid, score in scores_obj.dict.iteritems():
