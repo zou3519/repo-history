@@ -182,11 +182,13 @@ class SizeScoreModel(ScoreModel):
         node_list = nx.topological_sort(nx_graph, reverse=True)
         height_dict = {}
 
+        node_sizes = nx.get_node_attributes(nx_graph, 'size');
+
         for node in node_list:
             if type(node) != int:
                 node = int(node.decode("ascii"))
 
-            height = nx.get_node_attributes(nx_graph, 'size')[node]
+            height = node_sizes[node]
 
             height_dict[node] = height
 

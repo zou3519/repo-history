@@ -34,10 +34,10 @@ def main():
         for scoremodel in scoremodels:
             print "Data collection for %s %s" % (distmodel, scoremodel)
             nextdf = examinebugs("/home/cat/rzou/linux/", "mm", "mm", distmodel, scoremodel)
-            if df == None:
+            if df is None:
                 df = nextdf
             else:
-                col = distmodel + "_" + scoremodel
+                col = scoremodel + "_" + distmodel
                 df[col] = nextdf[col]
     df.to_csv("test.csv")
 
