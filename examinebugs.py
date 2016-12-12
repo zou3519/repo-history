@@ -21,15 +21,21 @@ def main():
     bug_rating_dict = compute_bug_ratings(patch_graphs_dict, revs)
     # print(bug_rating_dict)
 
-    dist_desc = 'BasicDistanceModel'
-    score_desc = 'SimpleScoreModel'
+    dist_desc = args.distmodel # 'BasicDistanceModel'
+    score_desc = args.scoremodel # 'SimpleScoreModel'
     scores_obj = Scores.read_from_file(analysis_name, score_desc + "_" + dist_desc)
     if scores_obj is None:
         print("Could not find cached scores")
         return
 
-    for pid, rating in bug_rating_dict.iteritems():
-        print("%d, %f, %f" % (pid, rating, scores_obj.dict[pid]))
+    # Write csv of (pid, score, rating)
+    for pid, score in scores_obj.dict.iteritems():
+        rating = 0
+        if pid in bug_rating_dict:
+            rating = bug_rating_dict[pid]
+            assert(rating != 0)
+        print("%d %f %f" % (pid, pid, rating))
+
 
 
 def parse_args():
@@ -40,6 +46,13 @@ def parse_args():
                         help='Path to the repo the file lives in.')
     parser.add_argument('--name', dest='name', type=str, required=True,
                         help='The name of this analysis')
+    # e.g. BasicDistanceModel
+    parser.add_argument('--distmodel', dest='distmodel', type=str, required=True,
+                        help='Distance model used')
+    # e.g. SimpleScoreModel
+    parser.add_argument('--scoremodel', dest='scoremodel', type=str, required=True,
+                        help='Score model used')
+
 
     return parser.parse_args()
 
