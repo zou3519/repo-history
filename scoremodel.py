@@ -52,9 +52,7 @@ class LongestScoreModel(ScoreModel):
             if type(node) != int:
                 node = int(node.decode("ascii"))
 
-            height = 0
-            max_len = -1
-            use_dst = None
+            max_len = -1e999
             for (src, dst, prob) in nx_graph.out_edges_iter(node, data='prob'):
                 if type(dst) != int:
                     dst = int(dst.decode("ascii"))
@@ -64,15 +62,11 @@ class LongestScoreModel(ScoreModel):
                 key = (dst_rev, src_rev, filekey)
                 if key not in distance_dict:
                     print "could not find key computation"
-                edge_value = distance_dict[key]
-                if edge_value > max_len:
-                    max_len = edge_value
-                    use_dst = dst
+                value = distance_dict[key] + height_dict[dst]
+                if value > max_len:
+                    max_len = value
 
-            if use_dst is None:
-                height_dict[node] = 0
-            else:
-                height_dict[node] = height_dict[use_dst] + max_len
+            height_dict[node] = 0 if max_len < 0 else max_len
 
         return height_dict
 
@@ -101,15 +95,11 @@ class ShortestScoreModel(ScoreModel):
                 key = (dst_rev, src_rev, filekey)
                 if key not in distance_dict:
                     print "could not find key computation"
-                edge_value = distance_dict[key]
-                if edge_value < min_len:
-                    min_len = edge_value
-                    use_dst = dst
+                value = distance_dict[key] + height_dict[dst]
+                if value < min_len:
+                    min_len = value
 
-            if use_dst is None:
-                height_dict[node] = 0
-            else:
-                height_dict[node] = height_dict[use_dst] + min_len
+            height_dict[node] = 0 if max_len >= 1e998 else max_len
 
         return height_dict
 
@@ -137,7 +127,7 @@ class InEdgesScoreModel(ScoreModel):
                 if key not in distance_dict:
                     print "could not find key computation"
                 edge_value = distance_dict[key]
-                height = edge_value
+                height += edge_value
 
             height_dict[node] = height
 
@@ -167,7 +157,7 @@ class OutEdgesScoreModel(ScoreModel):
                 if key not in distance_dict:
                     print "could not find key computation"
                 edge_value = distance_dict[key]
-                height = edge_value
+                height += edge_value
 
             height_dict[node] = height
 
