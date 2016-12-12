@@ -39,14 +39,23 @@ def examinebugs(repo_path, source_path, analysis_name, dist_desc, score_desc):
 
     # Write csv of (pid, score, rating)
     print "Creating output csv"
+
+    patches = []
+    scores = []
+    ratings = []
+
     series_name = score_desc + "_" + dist_desc
-    df = pd.DataFrame(columns=[series_name,'rating'])
     for pid, score in scores_obj.dict.iteritems():
         rating = 0
         if pid in bug_rating_dict:
             rating = bug_rating_dict[pid]
             assert(rating != 0)
-        df.loc[pid] = [score, rating]
+        patches.append(pid)
+        scores.append(score)
+        ratings.append(rating)
+
+    dic = {series_name: scores, 'rating': ratings }
+    df = pd.DataFrame(dic, index=patches)
     return df
 
 
