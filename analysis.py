@@ -210,17 +210,7 @@ def get_score_model_ctor(name):
     else:
         assert(False)
 
-
-def main():
-    global nthreads
-
-    args = parse_args()
-    nthreads = args.nthreads
-    analysis_name = args.name
-    repo_path = args.repo_path
-    source_path = args.source[0]
-    dist_model_name = args.distmodel
-    score_model_name = args.scoremodel
+def run_analysis(nthreads, analysis_name, repo_path, source_path, dist_model_name, score_model_name, analysis_context):
     analysis_context = GitContext(repo_path, source_path)
 
     print("Entering patch model phase")
@@ -234,6 +224,18 @@ def main():
     scores = compute_scores(
         analysis_name, analysis_context, patch_graphs_dict, distances, score_model_ctor)
 
+def main():
+    global nthreads
+
+    args = parse_args()
+    nthreads = args.nthreads
+    analysis_name = args.name
+    repo_path = args.repo_path
+    source_path = args.source[0]
+    dist_model_name = args.distmodel
+    score_model_name = args.scoremodel
+    
+    run_analysis(nthreads, analysis_name, repo_path, source_path, dist_model_name, score_model_name)
     # print distances.dict
     # print scores.dict
 

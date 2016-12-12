@@ -6,16 +6,39 @@ from distancemodel import Scores
 import pandas as pd
 
 
-def main():
-    args = parse_args()
-    repo_path = args.repo_path
-    source_path = args.source[0]
-    analysis_name = args.name
-    dist_desc = args.distmodel # 'BasicDistanceModel'
-    score_desc = args.scoremodel # 'SimpleScoreModel'
+# def main():
+#     args = parse_args()
+#     repo_path = args.repo_path
+#     source_path = args.source[0]
+#     analysis_name = args.name
+#     dist_desc = args.distmodel # 'BasicDistanceModel'
+#     score_desc = args.scoremodel # 'SimpleScoreModel'
 
-    df = examinebugs(repo_path, source_path, analysis_name, dist_desc, score_desc)
+#     df = examinebugs(repo_path, source_path, analysis_name, dist_desc, score_desc)
+#     df.to_csv("test.csv")
+
+
+def main():
+    distmodels = ["BasicDistanceModel", "GitDiffDistModel", "MossDistModel"]
+    scoremodels = ["SimpleScoreModel", "LongestScoreModel", "ShortestScoreModel", "InEdgesScoreModel",
+        "OutEdgesScoreModel", "SizeScoreModel", "TimeWeightedScoreModel"]
+
+    for distmodel in distmodels:
+        for scoremodel in scoremodels:
+            print "Start analysis %d %d" % (distmodel, scoremodel)
+            run_analysis(16, "mm", "/home/cat/rzou/linux/", "mm", distmodel, scoremodel)
+
+    df = None
+    for distmodel in distmodels:
+        for scoremodel in scoremodels:
+            nextdf = examinebugs("/home/cat/rzou/linux/", "mm", "mm", distmodel, scoremodel)
+            if df == None:
+                df = nextdf
+            else:
+                col = distmodel + "_" + scoremodel
+                df[col] = nextdf[col]
     df.to_csv("test.csv")
+
 
 
 def examinebugs(repo_path, source_path, analysis_name, dist_desc, score_desc):
