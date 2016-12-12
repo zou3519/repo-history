@@ -4,6 +4,7 @@ from gitcorpus import *
 from caching import read_patch_models
 from distancemodel import Scores
 import pandas as pd
+from analysis import *
 
 
 # def main():
@@ -25,12 +26,13 @@ def main():
 
     for distmodel in distmodels:
         for scoremodel in scoremodels:
-            print "Start analysis %d %d" % (distmodel, scoremodel)
+            print "Start analysis %s %s" % (distmodel, scoremodel)
             run_analysis(16, "mm", "/home/cat/rzou/linux/", "mm", distmodel, scoremodel)
 
     df = None
     for distmodel in distmodels:
         for scoremodel in scoremodels:
+            print "Data collection for %s %s" % (distmodel, scoremodel)
             nextdf = examinebugs("/home/cat/rzou/linux/", "mm", "mm", distmodel, scoremodel)
             if df == None:
                 df = nextdf
