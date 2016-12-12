@@ -50,7 +50,9 @@ def parse_args():
     parser.add_argument('--name', dest='name', type=str, required=True,
                         help='The name of this analysis')
     parser.add_argument('--distmodel', dest='distmodel', type=str, required=True,
-                        help='Distance model name (GitDiffDistModel | MossDistModel)')
+                        help='Distance model name (BasicDistanceModel | GitDiffDistModel | MossDistModel)')
+    parser.add_argument('--scoremodel', dest='scoremodel', type=str, required=True,
+                        help='Score model name (SimpleScoreModel | TimeWeightedScoreModel)')
     parser.add_argument('--nthreads', dest='nthreads', type=int, default=1,
                         help='Number of processes to run')
     return parser.parse_args()
@@ -190,6 +192,14 @@ def get_dist_model_ctor(name, repo_path):
     else:
         assert(False)
 
+def get_score_model_ctor(name):
+    if name == 'SimpleScoreModel':
+        return SimpleScoreModel
+    elif name == 'TimeWeightedScoreModel':
+        return TimeWeightedScoreModel
+    else:
+        assert(False)
+
 
 def main():
     global nthreads
@@ -200,6 +210,7 @@ def main():
     repo_path = args.repo_path
     source_path = args.source[0]
     dist_model_name = args.distmodel
+    score_model_name = args.scoremodel
     analysis_context = GitContext(repo_path, source_path)
 
     print("Entering patch model phase")
@@ -209,8 +220,9 @@ def main():
     distances = compute_distances(
         analysis_name, analysis_context, patch_graphs_dict, dist_model_ctor)
     print("Entering scores phase")
+    score_model_ctor = get_score_model_ctor(score_model_name)
     scores = compute_scores(
-        analysis_name, analysis_context, patch_graphs_dict, distances, SimpleScoreModel)
+        analysis_name, analysis_context, patch_graphs_dict, distances, score_model_ctor)
 
     # print distances.dict
     # print scores.dict

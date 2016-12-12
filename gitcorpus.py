@@ -46,6 +46,10 @@ class GitRepo(object):
         command = '%s show -s --format=%%at %s' % (self.git, commit)
         return self.run_command(command)
 
+    def commit_datetime(self, commit):
+        command = '%s show -s --format=%%ci %s' % (self.git, commit)
+        return self.run_command(command)
+
     def log_line_with_grep(self, grep, path):
         command = "%s log --grep='%s' --pretty=oneline -- %s" % (
             self.git, grep, path)
