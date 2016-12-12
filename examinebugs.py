@@ -34,7 +34,7 @@ def main():
         if pid in bug_rating_dict:
             rating = bug_rating_dict[pid]
             assert(rating != 0)
-        print("%d %f %f" % (pid, score, rating))
+        print("%d, %f, %f" % (pid, score, rating))
 
 
 
