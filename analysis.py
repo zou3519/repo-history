@@ -210,7 +210,7 @@ def get_score_model_ctor(name):
     else:
         assert(False)
 
-def run_analysis(nthreads, analysis_name, repo_path, source_path, dist_model_name, score_model_name, analysis_context):
+def run_analysis(nthreads, analysis_name, repo_path, source_path, dist_model_name, score_model_name):
     analysis_context = GitContext(repo_path, source_path)
 
     print("Entering patch model phase")

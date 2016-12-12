@@ -54,6 +54,7 @@ class LongestScoreModel(ScoreModel):
 
             height = 0
             max_len = -1
+            use_dst = None
             for (src, dst, prob) in nx_graph.out_edges_iter(node, data='prob'):
                 if type(dst) != int:
                     dst = int(dst.decode("ascii"))
@@ -66,8 +67,12 @@ class LongestScoreModel(ScoreModel):
                 edge_value = distance_dict[key]
                 if edge_value > max_len:
                     max_len = edge_value
+                    use_dst = dst
 
-            height_dict[node] = height_dict[dst] + max_len
+            if use_dst is None:
+                height_dict[node] = 0
+            else:
+                height_dict[node] = height_dict[use_dst] + max_len
 
         return height_dict
 
@@ -86,6 +91,7 @@ class ShortestScoreModel(ScoreModel):
 
             height = 0
             min_len = 1e999
+            use_dst = None
             for (src, dst, prob) in nx_graph.out_edges_iter(node, data='prob'):
                 if type(dst) != int:
                     dst = int(dst.decode("ascii"))
@@ -96,10 +102,14 @@ class ShortestScoreModel(ScoreModel):
                 if key not in distance_dict:
                     print "could not find key computation"
                 edge_value = distance_dict[key]
-                if edge_value < max_len:
+                if edge_value < min_len:
                     min_len = edge_value
+                    use_dst = dst
 
-            height_dict[node] = height_dict[dst] + max_len
+            if use_dst is None:
+                height_dict[node] = 0
+            else:
+                height_dict[node] = height_dict[use_dst] + min_len
 
         return height_dict
 
