@@ -10,6 +10,14 @@ def main():
     repo_path = args.repo_path
     source_path = args.source[0]
     analysis_name = args.name
+    dist_desc = args.distmodel # 'BasicDistanceModel'
+    score_desc = args.scoremodel # 'SimpleScoreModel'
+
+    df = examinebugs(repo_path, source_path, analysis_name, dist_desc, score_desc)
+    df.to_csv("test.csv")
+
+
+def examinebugs(repo_path, source_path, analysis_name, dist_desc, score_desc):
     analysis_context = GitContext(repo_path, source_path)
 
     patch_graphs_dict = read_patch_models(analysis_name)
@@ -21,21 +29,21 @@ def main():
     bug_rating_dict = compute_bug_ratings(patch_graphs_dict, revs)
     # print(bug_rating_dict)
 
-    dist_desc = args.distmodel # 'BasicDistanceModel'
-    score_desc = args.scoremodel # 'SimpleScoreModel'
     scores_obj = Scores.read_from_file(analysis_name, score_desc + "_" + dist_desc)
     if scores_obj is None:
         print("Could not find cached scores")
         return
 
     # Write csv of (pid, score, rating)
+    series_name = score_desc + "_" + dist_desc
+    df = pandas.DataFrame(columns=[series_name,'rating'])
     for pid, score in scores_obj.dict.iteritems():
         rating = 0
         if pid in bug_rating_dict:
             rating = bug_rating_dict[pid]
             assert(rating != 0)
-        print("%d, %f, %f" % (pid, score, rating))
-
+        df.loc[pid] = [score, rating]
+    return df
 
 
 def parse_args():

@@ -197,6 +197,16 @@ def get_score_model_ctor(name):
         return SimpleScoreModel
     elif name == 'TimeWeightedScoreModel':
         return TimeWeightedScoreModel
+    elif name == 'LongestScoreModel':
+        return LongestScoreModel
+    elif name == 'ShortestScoreModel':
+        return ShortestScoreModel
+    elif name == 'InEdgesScoreModel':
+        return InEdgesScoreModel
+    elif name == 'OutEdgesScoreModel':
+        return OutEdgesScoreModel
+    elif name == 'SizeScoreModel':
+        return SizeScoreModel
     else:
         assert(False)
 
