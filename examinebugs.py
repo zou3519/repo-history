@@ -3,6 +3,7 @@ import argparse
 from gitcorpus import *
 from caching import read_patch_models
 from distancemodel import Scores
+import pandas as pd
 
 
 def main():
@@ -36,7 +37,7 @@ def examinebugs(repo_path, source_path, analysis_name, dist_desc, score_desc):
 
     # Write csv of (pid, score, rating)
     series_name = score_desc + "_" + dist_desc
-    df = pandas.DataFrame(columns=[series_name,'rating'])
+    df = pd.DataFrame(columns=[series_name,'rating'])
     for pid, score in scores_obj.dict.iteritems():
         rating = 0
         if pid in bug_rating_dict:
