@@ -185,11 +185,10 @@ def get_dist_model_ctor(name, repo_path):
         return MossDistModel
     elif name == 'GitDiffDistModel':
         return git_diff_dist_model_ctor(repo_path)
-    elif name == 'SimpleScoreModel':
-        return SimpleScoreModel
+    elif name == 'BasicDistanceModel':
+        return BasicDistanceModel 
     else:
         assert(False)
-
 
 
 def main():
