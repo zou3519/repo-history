@@ -20,7 +20,7 @@ from analysis import *
 
 
 def main():
-    distmodels = ["BasicDistanceModel", "GitDiffDistModel", "MossDistModel", "PatienceDiffDistModel"]
+    distmodels = ["BasicDistanceModel", "GitDiffDistModel", "MossDistModel", "PatientDiffDistModel"]
     scoremodels = ["SimpleScoreModel", "LongestScoreModel", "ShortestScoreModel", "InEdgesScoreModel",
         "OutEdgesScoreModel", "SizeScoreModel", "TimeWeightedScoreModel"]
 

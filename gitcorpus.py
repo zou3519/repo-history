@@ -139,6 +139,7 @@ class GitDiffDistModel(CorpusDistModel):
                 result += 1
         return result
 
+
 class PatientDiffDistModel(CorpusDistModel):
 
     def __init__(self, repo_path):
