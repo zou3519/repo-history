@@ -99,7 +99,7 @@ class ShortestScoreModel(ScoreModel):
                 if value < min_len:
                     min_len = value
 
-            height_dict[node] = 0 if max_len >= 1e998 else max_len
+            height_dict[node] = 0 if min_len >= 1e998 else min_len
 
         return height_dict
 
