@@ -42,6 +42,10 @@ class GitRepo(object):
         command = '%s diff %s %s -- %s' % (self.git, old_rev, as_rev, path)
         return self.run_command(command)
 
+    def diff_patience(self, old_rev, as_rev, path):
+        command = '%s diff --patience %s %s -- %s' % (self.git, old_rev, as_rev, path)
+        return self.run_command(command)
+
     def commit_time(self, commit):
         command = '%s show -s --format=%%at %s' % (self.git, commit)
         return self.run_command(command)
@@ -122,6 +126,29 @@ class GitDiffDistModel(CorpusDistModel):
             return 0
 
         (exit_code, diff, err) = self.git_repo.diff(
+            old_rev, new_rev, analysis_context.source_path)
+        if exit_code:
+            debug("Git diff failed: git diff %s %s %s" % (old_rev,
+                                                          new_rev, analysis_context.source_path))
+            assert(False)  # Try again?
+
+        lines = diff.split('\n')
+        result = 0
+        for line in lines:
+            if line.startswith('+') or line.startswith('-'):
+                result += 1
+        return result
+
+class PatientDiffDistModel(CorpusDistModel):
+
+    def __init__(self, repo_path):
+        self.git_repo = GitRepo(repo_path)
+
+    def distance(self, analysis_context, old_rev, new_rev, filekey):
+        if old_rev == new_rev:
+            return 0
+
+        (exit_code, diff, err) = self.git_repo.diff_patience(
             old_rev, new_rev, analysis_context.source_path)
         if exit_code:
             debug("Git diff failed: git diff %s %s %s" % (old_rev,

@@ -178,7 +178,9 @@ def compute_scores(analysis_name, analysis_context, patch_graphs_dict, distances
     return scores
 
 
-def git_diff_dist_model_ctor(repo_path):
+def git_diff_dist_model_ctor(repo_path, patience=False):
+    if patience:
+        return (lambda: PatienceDiffDistModel(repo_path))
     return (lambda: GitDiffDistModel(repo_path))
 
 
@@ -187,6 +189,8 @@ def get_dist_model_ctor(name, repo_path):
         return MossDistModel
     elif name == 'GitDiffDistModel':
         return git_diff_dist_model_ctor(repo_path)
+    elif name == 'PatientDiffDistModel':
+        return git_diff_dist_model_ctor(repo_path, patience=True)
     elif name == 'BasicDistanceModel':
         return BasicDistanceModel 
     else:
