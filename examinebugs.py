@@ -84,6 +84,61 @@ def examinebugs(repo_path, source_path, analysis_name, dist_desc, score_desc):
     return df
 
 
+def examine_rev(repo_path, source_path, analysis_name, dist_desc, score_desc, revision):
+    
+    # Read graphs from file
+    analysis_context = GitContext(repo_path, source_path)
+    patch_graphs_dict = read_patch_models(analysis_name)
+    if patch_graphs_dict is None:
+        print("Could not find cached patch graph")
+        return
+    print "Read patch models"
+
+    # Find buggy patches 
+
+    # pid -> {'patch': patch} 
+    buggy_dict = patches_modified_by_rev(patch_graphs_dict, revision)
+    buggy_pids = pid2buggy.keys()
+
+
+    # Read scores from file
+    scores_obj = Scores.read_from_file(analysis_name, score_desc + "_" + dist_desc)
+    if scores_obj is None:
+        print("Could not find cached scores")
+        return
+
+    scores = scores_obj.values()
+    scores.sort()
+
+    # Attach scores and percentiles to the buggy patch dict.
+    for pid in buggy_pids:
+        score = scores_obj.dict[pid]
+        index = scores.index(score)
+        percentile = index*1. / len(scores)
+
+        buggy_dict[pid]['percentile'] = percentile
+        buggy_dict[pid]['score'] = score
+
+    return buggy_dict 
+
+
+def patches_modified_by_rev(patch_models_dict, revision):
+    result = {}
+
+    patch_models = patch_models_dict.values()
+    for patch_model in patch_models:
+        nx_graph = patch_model.graph
+        if revision not in patch_model.rev_to_pids:
+            continue
+        rev_pids = patch_model.rev_to_pids[revision]
+        for rev_pid in rev_pids:
+            for (src, dst, prob) in nx_graph.out_edges_iter(rev_pid, data='prob'):
+                dst_patch = eval(nx_graph.node[dst]['patch'])
+                dst_pid = dst_patch['pid']
+                result[dst_pid] = {'patch': dst_patch}
+
+
+
 def parse_args():
     parser = argparse.ArgumentParser(usage='%%prog [options] source')
 
