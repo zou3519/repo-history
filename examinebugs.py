@@ -98,7 +98,7 @@ def examine_rev(repo_path, source_path, analysis_name, dist_desc, score_desc, re
 
     # pid -> {'patch': patch} 
     buggy_dict = patches_modified_by_rev(patch_graphs_dict, revision)
-    buggy_pids = pid2buggy.keys()
+    buggy_pids = buggy_dict.keys()
 
 
     # Read scores from file
@@ -107,7 +107,7 @@ def examine_rev(repo_path, source_path, analysis_name, dist_desc, score_desc, re
         print("Could not find cached scores")
         return
 
-    scores = scores_obj.values()
+    scores = scores_obj.dict.values()
     scores.sort()
 
     # Attach scores and percentiles to the buggy patch dict.
@@ -136,6 +136,7 @@ def patches_modified_by_rev(patch_models_dict, revision):
                 dst_patch = eval(nx_graph.node[dst]['patch'])
                 dst_pid = dst_patch['pid']
                 result[dst_pid] = {'patch': dst_patch}
+    return result
 
 
 
