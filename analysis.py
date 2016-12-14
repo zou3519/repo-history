@@ -180,7 +180,7 @@ def compute_scores(analysis_name, analysis_context, patch_graphs_dict, distances
 
 def git_diff_dist_model_ctor(repo_path, patience=False):
     if patience:
-        return (lambda: PatienceDiffDistModel(repo_path))
+        return (lambda: PatientDiffDistModel(repo_path))
     return (lambda: GitDiffDistModel(repo_path))
 
 
@@ -214,8 +214,11 @@ def get_score_model_ctor(name):
     else:
         assert(False)
 
-def run_analysis(nthreads, analysis_name, repo_path, source_path, dist_model_name, score_model_name):
+def run_analysis(threads, analysis_name, repo_path, source_path, dist_model_name, score_model_name):
     analysis_context = GitContext(repo_path, source_path)
+
+    global nthreads
+    nthreads = threads
 
     print("Entering patch model phase")
     patch_graphs_dict = create_patch_models(analysis_name, analysis_context)
