@@ -135,6 +135,10 @@ def patches_modified_by_rev(patch_models_dict, revision):
             for (src, dst, prob) in nx_graph.out_edges_iter(rev_pid, data='prob'):
                 dst_patch = eval(nx_graph.node[dst]['patch'])
                 dst_pid = dst_patch['pid']
+                if dst_pid in rev_pids:
+                    continue
+
+                dst_patch = eval(nx_graph.node[dst]['patch'])
                 result[dst_pid] = {'patch': dst_patch}
     return result
 
@@ -208,7 +212,11 @@ def bug_rating_dict(patch_model, bugfix_rev):
     for rev_pid in rev_pids:
         for (src, dst, prob) in nx_graph.out_edges_iter(rev_pid, data='prob'):
             dst_pid = (eval(nx_graph.node[dst]['patch'])['pid'])
-            # dst_pid = nx_graph.node[dst]['id']
+
+            # Chuck the pid out the window if it's part of the bugfix revision.
+            if dst_pid in rev_pids:
+                continue
+
             if dst_pid not in result:
                 result[dst_pid] = 0
             result[dst_pid] += prob
