@@ -18,8 +18,8 @@ def main():
     args = parse_args()
     examine_graph(args.analysis_name, args.filekey,
                   args.dist_descriptor, args.score_descriptor, args.outfile_name)
-    os.system('google-chrome %s%s/%s' %
-              (graph_generation_path, args.outfile_name, graph_template_file))
+    # os.system('google-chrome %s%s/%s' %
+    #          (graph_generation_path, args.outfile_name, graph_template_file))
 
 
 def parse_args():
@@ -60,18 +60,18 @@ def examine_graph(analysis_name, filekey, dist_descriptor, score_descriptor, out
 def build_viz_from_graph(name, nx_graph, distances, scores, filekey):
     elements = graph_to_cytoscope(nx_graph, distances, scores, filekey)
 
-    nx.write_graphml(nx_graph, "/home/cat/rzou/pomelo/xml/" + name + ".xml")
+    nx.write_graphml(nx_graph, "graphml/" + name + ".xml")
     # inject elements into new html file
     graph_path = graph_generation_path + name
     template_file = graph_path + '/' + graph_template_file
-    copy(graph_template_path, graph_generation_path + name)
+    # copy(graph_template_path, graph_generation_path + name)
     new_content = ''
 
-    with open(template_file, 'r') as content_file:
-        template = Template(content_file.read())
-        new_content = template.safe_substitute(elements=elements)
-    with open(template_file, 'w') as content_file:
-        content_file.write(new_content)
+    # with open(template_file, 'r') as content_file:
+    #    template = Template(content_file.read())
+    #     new_content = template.safe_substitute(elements=elements)
+    # with open(template_file, 'w') as content_file:
+    #    content_file.write(new_content)
 
 
 def graph_to_cytoscope(nx_graph, distances, scores, filekey):
